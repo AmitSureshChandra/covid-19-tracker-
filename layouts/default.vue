@@ -20,7 +20,11 @@
     <v-footer
       app
     >
-      <span>&copy; {{ new Date().getFullYear() }}  covid-19 tracker</span>
+      <span>&copy; {{ new Date().getFullYear() }}  covid-19 tracker </span>
+      <v-row align="right">
+        <v-spacer></v-spacer>
+        - Developed By <span > &nbsp;<b>Amit Kesarwani</b></span>
+      </v-row>
     </v-footer>
   </v-app>
 </template>

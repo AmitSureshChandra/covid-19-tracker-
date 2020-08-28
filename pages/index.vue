@@ -6,14 +6,26 @@
 
     <div id="pieCaseChartConfirmed"></div>
     <div align="center">
-          <v-chip color="orange" align="center" class="white--text">Countries having &nbsp; <span class="white--text darken">Confirmed Case</span> &nbsp; > 100000</v-chip>
+          <v-chip :color="colors[getStates()-1]" align="center" class="white--text">Countries having &nbsp; <span class="white--text darken">{{ this.state}} Case</span> &nbsp; > 100000</v-chip>
     </div>
+
+     <div>
+        <v-alert>
+            <v-row class="ma-3">
+            <v-select :items="states" v-model="state"  label="States"  dense class="ma-3" @change="load" >
+            </v-select>
+
+            <v-text-field  v-model="count" label="Countries having Minimum Count"  dense class="ma-3" @change="load" >
+            </v-text-field>
+          </v-row>
+        </v-alert>
+      </div>
+
   </div>
 </template>
 
 <script>
 
-  import CasesPieChart from "../components/CasesPieChart";
 
   class GlobalData{
       confirmed = 0
@@ -23,10 +35,31 @@
 
   import CovidCard from "../components/CovidCard";
   import c3 from 'c3'
+  import moment from 'moment'
   export default {
-      components: {CasesPieChart, CovidCard},
-      async mounted() {
-        await this.$axios.get('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/08-27-2020.csv')
+      components: { CovidCard},
+      mounted() {
+          this.load()
+      },
+      data(){
+          return{
+            confirmed : 0,
+            deaths : 0,
+            recovered : 0,
+            loading : true,
+            countries : {},
+            pieChartData : [],
+            states : [ 'Confirmed','Deaths','Recovered'],
+            state : 'Confirmed',
+            count :100000,
+            colors : [
+              'orange','red','green'
+            ]
+          }
+      },
+      methods : {
+        async load(){
+          await this.$axios.get('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'+ moment().subtract(2,'days').format('MM-DD-YYYY') +'.csv')
           .then((res) => {
             this.loading = true
 
@@ -65,8 +98,10 @@
                 this.confirmed = parseInt(this.confirmed) + parseInt(v.confirmed)
                 this.deaths = parseInt(this.deaths) + parseInt(v.deaths)
                 this.recovered = parseInt(this.recovered) + parseInt(v.recovered)
-                if (parseInt(v.confirmed) > 100000){
-                  this.pieChartData.push([v.country , parseInt(v.confirmed) ])
+                let check =  this.getStates()
+                let val = check === 1 ? parseInt(v.confirmed) : ( check === 2 ? parseInt(v.deaths) : parseInt(v.recovered) )
+                if (val > this.count){
+                  this.pieChartData.push([v.country , val ])
                 }
             })
 
@@ -98,17 +133,23 @@
           .finally(_ => {
             this.loading = false
           })
-      },
-      data(){
-          return{
-            confirmed : 0,
-            deaths : 0,
-            recovered : 0,
-            loading : true,
-            countries : {},
-            pieChartData : [],
+        },
+
+        getStates(){
+          switch (this.state) {
+            case "Confirmed":
+                return 1;
+            case "Deaths":
+                return 2;
+            case "Recovered":
+                return 3;
           }
+        }
       }
   }
 </script>
+
+<style>
+  @import 'https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.20/c3.min.css';
+</style>
 
