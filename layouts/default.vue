@@ -8,10 +8,6 @@
     >
       <v-app-bar-nav-icon v-show="false" />
 
-      <span class="title primary--text">
-        {{ title }}
-      </span>
-
         <nuxt-link to="/home">Home</nuxt-link>
         <nuxt-link to="/countries">Countries</nuxt-link>
 
@@ -22,7 +18,6 @@
       </v-container>
     </v-main>
     <v-footer
-      :absolute="!fixed"
       app
     >
       <span>&copy; {{ new Date().getFullYear() }}  covid-19 tracker</span>
