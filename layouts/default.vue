@@ -1,6 +1,6 @@
 <template>
   <v-app dark>
-    <v-toolbar
+    <v-app-bar
       fixed
       app
       i
@@ -8,10 +8,10 @@
     >
       <v-app-bar-nav-icon v-show="false" />
 
-        <nuxt-link to="/home">Home</nuxt-link>
+        <nuxt-link to="/">Home</nuxt-link>
         <nuxt-link to="/countries">Countries</nuxt-link>
 
-      </v-toolbar>
+      </v-app-bar>
     <v-main>
       <v-container>
         <nuxt />
