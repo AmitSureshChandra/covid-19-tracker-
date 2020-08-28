@@ -27,6 +27,11 @@
       },
       async mounted(){
 
+      },
+      head(){
+        return{
+          title : 'Countries'
+        }
       }
     }
 </script>

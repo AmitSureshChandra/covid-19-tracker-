@@ -145,7 +145,12 @@
                 return 3;
           }
         }
-      }
+      },
+    head(){
+        return{
+            title : 'Covid-19 Tracking'
+        }
+    }
   }
 </script>
 
