@@ -49,6 +49,7 @@ export default {
   buildModules: [
     '@nuxt/typescript-build',
     '@nuxtjs/vuetify',
+    '@nuxtjs/moment',
   ],
   /*
   ** Nuxt.js modules

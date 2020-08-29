@@ -1,6 +1,37 @@
 <template>
   <div>
 
+      <v-row>
+        <v-spacer></v-spacer>
+<!--        <date-picker type="date" format="DD-MM-YYYY" v-model="date" valueType="format"></date-picker>-->
+
+<!--        <v-menu-->
+<!--          ref="menu"-->
+<!--          v-model="menu"-->
+<!--          :close-on-content-click="false"-->
+<!--          :return-value.sync="date"-->
+<!--          transition="scale-transition"-->
+<!--          offset-y-->
+<!--          min-width="290px"-->
+<!--        >-->
+<!--          <template v-slot:activator="{ on, attrs }">-->
+<!--            <v-text-field-->
+<!--              v-model="date"-->
+<!--              label="Picker in menu"-->
+<!--              prepend-icon="mdi-calendar"-->
+<!--              :max="new Date()"-->
+<!--              readonly-->
+<!--              v-bind="attrs"-->
+<!--              v-on="on"-->
+<!--            ></v-text-field>-->
+<!--          </template>-->
+<!--          <v-date-picker v-model="date" no-title scrollable>-->
+<!--            <v-spacer></v-spacer>-->
+<!--            <v-btn text color="primary" @click="menu = false">Cancel</v-btn>-->
+<!--            <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>-->
+<!--          </v-date-picker>-->
+<!--        </v-menu>-->
+      </v-row>
 
      <h1 class="pa-4 display-2 bold my-3" align="center">Covid-19 Tracker</h1>
      <Covid-Card :confirmed="confirmed" :deaths="deaths" :recovered="recovered" :loading="loading"/>
@@ -14,11 +45,13 @@
      <div>
         <v-alert>
             <v-row class="ma-3">
-            <v-select :items="states" v-model="state"  label="States"  dense class="ma-3" @change="load" >
+            <v-select  outlined :items="states" v-model="state"  label="States"  dense class="ma-3" @change="load" >
             </v-select>
 
-            <v-text-field  v-model="count" label="Countries having Minimum Count"  dense class="ma-3" @change="load" >
+            <v-text-field outlined   v-model="count" label="Countries having Minimum Count" type="number"  dense class="ma-3" @change="load" >
             </v-text-field>
+
+
           </v-row>
         </v-alert>
       </div>
@@ -38,8 +71,14 @@
   import CovidCard from "../components/CovidCard";
   import c3 from 'c3'
   import moment from 'moment'
+  import DatePicker from 'vue2-datepicker';
+  import 'vue2-datepicker/index.css';
+
   export default {
-      components: { CovidCard},
+      components: {
+        CovidCard,
+        DatePicker
+      },
       mounted() {
           this.load()
       },
@@ -57,7 +96,9 @@
             count :100000,
             colors : [
               'orange','red','green'
-            ]
+            ],
+            menu  : false,
+            date : new Date().toISOString().substr(0, 10),
           }
       },
       methods : {
@@ -67,6 +108,10 @@
             this.loading = true
 
             let countries = {}
+            this.confirmed = 0
+            this.deaths = 0
+            this.recovered = 0
+
             let records = res.data.split('\n')
             records.splice(0,1)
 
