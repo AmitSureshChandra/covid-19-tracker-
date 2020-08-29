@@ -130,13 +130,13 @@
                     value: function (value, ratio, id, index) { return value; }
                   }
                 },
-                pie : {
-                  label: {
-                  format: function (value, ratio, id) {
-                    return value;
-                  }
-                }
-                }
+                // pie : {
+                //   label: {
+                //   format: function (value, ratio, id) {
+                //     return value;
+                //   }
+                // }
+                // }
             });
         }
       },
