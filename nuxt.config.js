@@ -37,6 +37,9 @@ export default {
   ** https://nuxtjs.org/guide/plugins
   */
   plugins: [
+    {
+      src : '@plugins/initializer.js',
+    }
   ],
   /*
   ** Auto import components

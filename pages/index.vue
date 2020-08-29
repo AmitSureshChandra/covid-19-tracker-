@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-card class="px-6 pt-4" :loading="loading">
 
       <v-row>
         <v-spacer></v-spacer>
@@ -33,6 +33,12 @@
 <!--        </v-menu>-->
       </v-row>
 
+      <div class="float-right">
+              <v-btn @click="load()" color="error" fab dark>
+                <v-icon>mdi-reload</v-icon>
+              </v-btn>
+      </div>
+
      <h1 class="pa-4 display-2 bold my-3" align="center">Covid-19 Tracker</h1>
      <Covid-Card :confirmed="confirmed" :deaths="deaths" :recovered="recovered" :loading="loading"/>
 
@@ -56,23 +62,20 @@
         </v-alert>
       </div>
 
-  </div>
+  </v-card>
 </template>
 
 <script>
 
 
-  class GlobalData{
-      confirmed = 0
-      deaths = 0
-      recovered = 0
-  }
+
 
   import CovidCard from "../components/CovidCard";
   import c3 from 'c3'
   import moment from 'moment'
   import DatePicker from 'vue2-datepicker';
   import 'vue2-datepicker/index.css';
+  import {GlobalData} from "../plugins/initializer";
 
   export default {
       components: {
@@ -103,9 +106,11 @@
       },
       methods : {
         async load(){
+
+          this.loading = true
           await this.$axios.get('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'+ moment().subtract(1,'days').format('MM-DD-YYYY') +'.csv')
           .then((res) => {
-            this.loading = true
+
 
             let countries = {}
             this.confirmed = 0
