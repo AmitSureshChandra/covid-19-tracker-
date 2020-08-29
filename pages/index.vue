@@ -1,5 +1,7 @@
 <template>
   <div>
+
+
      <h1 class="pa-4 display-2 bold my-3" align="center">Covid-19 Tracker</h1>
      <Covid-Card :confirmed="confirmed" :deaths="deaths" :recovered="recovered" :loading="loading"/>
 
@@ -46,6 +48,7 @@
             confirmed : 0,
             deaths : 0,
             recovered : 0,
+
             loading : true,
             countries : {},
             pieChartData : [],
@@ -59,7 +62,7 @@
       },
       methods : {
         async load(){
-          await this.$axios.get('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'+ moment().subtract(2,'days').format('MM-DD-YYYY') +'.csv')
+          await this.$axios.get('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'+ moment().subtract(1,'days').format('MM-DD-YYYY') +'.csv')
           .then((res) => {
             this.loading = true
 
@@ -69,6 +72,7 @@
 
             records.splice(records.length-1,1)
             records.forEach(v => {
+
               let data = v.split(',')
 
               if (Object.keys(countries).includes(data[3])){

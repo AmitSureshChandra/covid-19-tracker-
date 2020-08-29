@@ -10,17 +10,21 @@
 
         <nuxt-link to="/">Home</nuxt-link>
         <nuxt-link to="/countries">Countries</nuxt-link>
+        <v-spacer></v-spacer>
 
       </v-app-bar>
     <v-main>
       <v-container>
         <nuxt />
       </v-container>
+
     </v-main>
     <v-footer
       app
     >
-      <span>&copy; {{ new Date().getFullYear() }}  covid-19 tracker </span>
+      <span>&copy; {{ new Date().getFullYear() }} -
+          data sourced from <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank">CSSEGISandData</a>
+      </span>
       <v-row align="right">
         <v-spacer></v-spacer>
         - Developed By <span > &nbsp;<b>Amit Kesarwani</b></span>
