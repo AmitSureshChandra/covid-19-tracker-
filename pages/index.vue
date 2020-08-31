@@ -107,7 +107,7 @@
       },
       methods : {
         async load(){
-
+          console.log(this.$moment.now())
           this.loading = true
           let prev =2
           if(moment().hour() > 10){
@@ -115,8 +115,6 @@
           }
           await this.$axios.get('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'+ moment().subtract(prev,'days').format('MM-DD-YYYY') +'.csv')
           .then((res) => {
-
-            console.log()
 
             let countries = {}
             this.confirmed = 0
