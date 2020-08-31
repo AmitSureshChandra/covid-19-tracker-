@@ -2,41 +2,48 @@
   <v-card class="px-6 pt-4" :loading="loading">
 
       <v-row>
+
+        <v-col cols="8" sm="4" class="float-left" align="left">
+          <h4>
+            <v-menu
+              ref="menu"
+              v-model="menu"
+              :close-on-content-click="false"
+              :return-value.sync="date"
+              transition="scale-transition"
+              offset-y
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="getComputedDate2"
+                  label="Data Uptill"
+                  prepend-icon="mdi-calendar"
+                  :max="new Date()"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker v-model="date" no-title scrollable>
+                <v-spacer></v-spacer>
+                <v-btn text color="primary" @click="menu = false">Cancel</v-btn>
+                <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>
+              </v-date-picker>
+            </v-menu>
+          </h4>
+        </v-col>
         <v-spacer></v-spacer>
 <!--        <date-picker type="date" format="DD-MM-YYYY" v-model="date" valueType="format"></date-picker>-->
-
-<!--        <v-menu-->
-<!--          ref="menu"-->
-<!--          v-model="menu"-->
-<!--          :close-on-content-click="false"-->
-<!--          :return-value.sync="date"-->
-<!--          transition="scale-transition"-->
-<!--          offset-y-->
-<!--          min-width="290px"-->
-<!--        >-->
-<!--          <template v-slot:activator="{ on, attrs }">-->
-<!--            <v-text-field-->
-<!--              v-model="date"-->
-<!--              label="Picker in menu"-->
-<!--              prepend-icon="mdi-calendar"-->
-<!--              :max="new Date()"-->
-<!--              readonly-->
-<!--              v-bind="attrs"-->
-<!--              v-on="on"-->
-<!--            ></v-text-field>-->
-<!--          </template>-->
-<!--          <v-date-picker v-model="date" no-title scrollable>-->
-<!--            <v-spacer></v-spacer>-->
-<!--            <v-btn text color="primary" @click="menu = false">Cancel</v-btn>-->
-<!--            <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>-->
-<!--          </v-date-picker>-->
-<!--        </v-menu>-->
+        <v-col>
+          <v-btn class="float-right" @click="load()" color="error" fab dark>
+            <v-icon>mdi-reload</v-icon>
+          </v-btn>
+        </v-col>
       </v-row>
 
       <div class="float-right">
-              <v-btn @click="load()" color="error" fab dark>
-                <v-icon>mdi-reload</v-icon>
-              </v-btn>
+
       </div>
 
      <h1 class="pa-4 display-2 bold my-3" align="center">Covid-19 Tracker</h1>
@@ -56,8 +63,6 @@
 
             <v-text-field outlined   v-model="count" label="Countries having Minimum Count" type="number"  dense class="ma-3" @change="load" >
             </v-text-field>
-
-
           </v-row>
         </v-alert>
       </div>
@@ -66,9 +71,6 @@
 </template>
 
 <script>
-
-
-
 
   import CovidCard from "../components/CovidCard";
   import c3 from 'c3'
@@ -82,6 +84,24 @@
       components: {
         CovidCard,
         DatePicker
+      },
+      watch : {
+          date(v){
+            this.load()
+          }
+      },
+      computed:{
+          getComputedDate(){
+            return this.$moment(this.date).format('MM-DD-YYYY')
+          },
+
+        // for showing to user
+          getComputedDate2(){
+            return this.$moment(this.date).format('DD-MM-YYYY')
+          },
+
+
+
       },
       mounted() {
           this.load()
@@ -107,14 +127,19 @@
       },
       methods : {
         async load(){
-          console.log(this.$moment.now())
+
           this.loading = true
           let prev =2
           if(moment().hour() > 10){
             prev = 1;
           }
-          await this.$axios.get('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'+ moment().subtract(prev,'days').format('MM-DD-YYYY') +'.csv')
+          if (this.$moment().diff(this.date,'days') >= 2){
+            prev = 0
+          }
+
+          await this.$axios.get('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'+ this.$moment(this.date).subtract(prev,'days').format('MM-DD-YYYY') +'.csv')
           .then((res) => {
+
 
             let countries = {}
             this.confirmed = 0
@@ -187,6 +212,7 @@
           })
           .catch(_ => {
             console.log(_)
+            alert('Something went Wrong ... try to choose Correct date')
           })
           .finally(_ => {
             this.loading = false

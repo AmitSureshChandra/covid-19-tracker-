@@ -12,22 +12,33 @@
         <nuxt-link to="/countries">Countries</nuxt-link>
         <v-spacer></v-spacer>
 
+        <v-btn text fab @click="theme = !theme; $vuetify.theme.dark = theme">
+          <v-icon>{{ theme ? 'mdi-lightbulb-on' : 'mdi-lightbulb-on-outline' }}</v-icon>
+        </v-btn>
+
       </v-app-bar>
     <v-main>
       <v-container>
         <nuxt />
       </v-container>
-
+    <v-row class="px-5">
+      <span>data sourced from <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank">CSSEGISandData</a>
+      </span>
+    </v-row>
     </v-main>
     <v-footer
       app
     >
-      <span>&copy; {{ new Date().getFullYear() }} -
-          data sourced from <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank">CSSEGISandData</a>
-      </span>
       <v-row align="right">
-        <v-spacer></v-spacer>
-        - Developed By <span > &nbsp;<b>Amit Kesarwani</b></span>
+        <v-col class="float-right" col="11">
+            <span class="float-right">
+                - Developed By <span > &nbsp;<b>Amit Kesarwani </b></span>
+            </span>
+        </v-col>
+        <v-col cols="1">
+          <v-img src="favicon.ico" width="20" />
+        </v-col>
+
       </v-row>
     </v-footer>
   </v-app>
@@ -50,7 +61,8 @@ export default {
         }
       ],
 
-      title: 'Covid-19 Tracker'
+      title: 'Covid-19 Tracker',
+      theme : false,
     }
   }
 }

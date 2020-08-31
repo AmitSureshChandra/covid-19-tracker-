@@ -2,10 +2,55 @@
   <v-card class="pa-6" :loading="loading">
 
     <div class="float-right">
-            <v-btn @click="loadCountryData()" color="error" fab dark>
-              <v-icon>mdi-reload</v-icon>
-            </v-btn>
+
     </div>
+    <h4>
+      <v-row>
+        <v-col cols="7" sm="4">
+          <v-tooltip right>
+              <template v-slot:activator="{ on, attrs }" >
+                <v-menu
+                  v-bind="attrs"
+                  v-on="on"
+                  ref="menu"
+                  v-model="menu"
+                  :close-on-content-click="false"
+                  :return-value.sync="date"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="290px"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="getComputedDate2"
+                      label="Data Uptill"
+                      prepend-icon="mdi-calendar"
+                      :max="new Date()"
+                      readonly
+                      v-bind="attrs"
+                      v-on="on"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker v-model="date" no-title scrollable>
+                    <v-spacer></v-spacer>
+                    <v-btn text color="primary" @click="menu = false">Cancel</v-btn>
+                    <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>
+                  </v-date-picker>
+                </v-menu>
+              </template>
+
+            <h5 > Choose Date Uptill you want to see Data</h5>
+          </v-tooltip>
+
+        </v-col>
+
+        <v-col cols="5" sm="8">
+          <v-btn @click="loadCountryData()" class="float-right" color="error" fab dark>
+            <v-icon>mdi-reload</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </h4>
      <h1 class="pa-4 display-2 bold my-3" align="center">Covid-19 Tracker Country Wice</h1>
 
     <v-combobox @change="loadCountryData()" :items="countries" dense solo color="primary" placeholder="Country Name" v-model="country" />
@@ -34,9 +79,9 @@
             data : {},
             countries  :[],
             country : 'India',
-            confirmed : 0,
-            deaths : 0,
-            recovered : 0,
+            confirmed : 'NA',
+            deaths : 'NA',
+            recovered : 'NA',
 
             loading : true,
             pieChartData : [],
@@ -45,17 +90,42 @@
             colors : [
               'orange','red','green'
             ],
-
+          date : new Date().toISOString().substr(0, 10),
+            theme : false,
+            menu : false,
+        }
+      },
+      watch : {
+        date(v){
+          this.load()
         }
       },
       mounted(){
           this.load()
       },
+      computed : {
+        getComputedDate(){
+          return this.$moment(this.date).format('MM-DD-YYYY')
+        },
+
+        // for showing to user
+        getComputedDate2(){
+          return this.$moment(this.date).format('DD-MM-YYYY')
+        },
+      },
       methods : {
           async load(){
 
+            this.loading = true
+            let prev =2
+            if(moment().hour() > 10){
+              prev = 1;
+            }
+            if (this.$moment().diff(this.date,'days') >= 2){
+              prev = 0
+            }
           this.loading = true
-          await this.$axios.get('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'+ moment().subtract(1,'days').format('MM-DD-YYYY') +'.csv')
+          await this.$axios.get('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'+ this.$moment(this.date).subtract(prev,'days').format('MM-DD-YYYY') +'.csv')
           .then((res) => {
 
 
@@ -96,6 +166,7 @@
           })
           .catch(_ => {
             console.log(_)
+            alert('Something Went Wrong ... Please Select Proper Date')
           })
           .finally(_ => {
             this.loading = false
