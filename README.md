@@ -1,4 +1,18 @@
 # covid-19-tracker
+  Where you can track present & past covid-19 data globally/country wice
+
+
+### Features Developed 
+      
+      1. Global/Country records including Confirmed , Deaths & Recoved Cases
+      2. Theme Support (Dark Mode)
+      3. Past date can be selected to see Covid-19 data till that day
+      4. Graphical Representaion of Data using Pie Chart
+      
+#### Features to be added
+
+      1. State/Area wise seletion
+      2. More chart to visualize more precisely
 
 ## Build Setup
 
