@@ -53,16 +53,44 @@
     </h4>
      <h1 class="pa-4 display-2 bold my-3" align="center">Covid-19 Tracker Country Wice</h1>
 
-    <v-combobox @change="loadCountryData()" :items="countries" dense solo color="primary" placeholder="Country Name" v-model="country" />
-    <Covid-Card :confirmed="parseInt(confirmed)" :deaths="parseInt(deaths)" :recovered="parseInt(recovered)"/>
-    <div id="pieChartCountry"></div>
-    <div align="center">
-          <v-chip color="primary" align="center" class="white--text"> Country : {{country}}</v-chip>
-    </div>
-<!--    Loader-->
-<!--    <v-text-field color="success" loading disabled></v-text-field>-->
+    <v-combobox @change="loadCountryData()" :items="countries" dense solo color="primary" placeholder="Country Name" v-model="country" >
+      <template v-slot:no-data>
+          <span class="px-4">No Country Available</span>
+      </template>
+    </v-combobox>
 
-<!--    Work in progress-->
+    <Covid-Card :confirmed="parseInt(confirmed)" :deaths="parseInt(deaths)" :recovered="parseInt(recovered)"/>
+
+    <v-combobox class="mt-4" @change="loadStateData()" :items="country_states" dense solo color="primary" placeholder="State Name" v-model="country_state" >
+      <template v-slot:no-data>
+        <span class="px-4">No State/Area Available</span>
+      </template>
+    </v-combobox>
+
+    <Covid-Card :confirmed="parseInt(state_confirmed)" :deaths="parseInt(state_deaths)" :recovered="parseInt(state_recovered)"/>
+
+    <v-row>
+      <v-col cols="12" sm="6">
+        <div id="pieChartCountry"></div>
+
+        <div align="center" >
+          <v-chip color="primary" align="center" class="white--text">  Country : {{ country }}</v-chip>
+        </div>
+      </v-col>
+
+      <v-col cols="12" sm="6" >
+        <div id="pieChartState"></div>
+
+        <div align="center" >
+          <v-chip color="primary" align="center" class="white--text"> State : {{ country_state }}</v-chip>
+        </div>
+      </v-col>
+    </v-row>
+
+<!--    <v-row>-->
+<!--      <div id="linechart"></div>-->
+<!--    </v-row>-->
+
   </v-card>
 </template>
 
@@ -85,14 +113,21 @@
 
             loading : true,
             pieChartData : [],
+            pieChartStateData : [],
+
             states : [ 'Confirmed','Deaths','Recovered'],
             state : 'Confirmed',
             colors : [
               'orange','red','green'
             ],
-          date : new Date().toISOString().substr(0, 10),
+            date : new Date().toISOString().substr(0, 10),
             theme : false,
             menu : false,
+            country_states : [],
+            country_state : "",
+            state_confirmed : 'NA',
+            state_deaths : 'NA',
+            state_recovered : 'NA',
         }
       },
       watch : {
@@ -118,16 +153,18 @@
 
             this.loading = true
             let prev =2
+
             if(moment().hour() > 10){
               prev = 1;
             }
+
             if (this.$moment().diff(this.date,'days') >= 2){
               prev = 0
             }
-          this.loading = true
-          await this.$axios.get('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'+ this.$moment(this.date).subtract(prev,'days').format('MM-DD-YYYY') +'.csv')
-          .then((res) => {
 
+            this.loading = true
+            await this.$axios.get('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'+ this.$moment(this.date).subtract(prev,'days').format('MM-DD-YYYY') +'.csv')
+            .then((res) => {
 
             let countries = {}
             this.confirmed = 0
@@ -143,26 +180,41 @@
               let data = v.split(',')
 
               if (Object.keys(countries).includes(data[3])){
+
                     let country = countries[data[3]]
                     country.country = data[3]
                     country.confirmed =  parseInt(country.confirmed) + parseInt(data[7])
                     country.deaths =  parseInt(country.deaths) + parseInt(data[8])
                     country.recovered =  parseInt(country.recovered) + parseInt(data[9])
 
+                    if (data[2]){
+                      country.area.push(data[2])
+                      country.area_confirm.push(data[7])
+                      country.area_death.push(data[8])
+                      country.area_recover.push(data[9])
+                    }
+
               }else{
                 let country = new GlobalData()
+
                 country.country = data[3]
                 country.confirmed += data[7]
                 country.deaths += data[8]
                 country.recovered += data[9]
+
+                if (data[2]){
+                  country.area.push(data[2])
+                  country.area_confirm.push(data[7])
+                  country.area_death.push(data[8])
+                  country.area_recover.push(data[9])
+                }
+
                 countries[data[3]] = country
               }
             })
 
             this.data= countries
-
             this.loadCountryData()
-
           })
           .catch(_ => {
             console.log(_)
@@ -172,18 +224,54 @@
             this.loading = false
           })
         },
+        loadStateData(){
+
+          this.state_confirmed = "NA"
+          this.state_deaths = "NA"
+          this.state_recovered = "NA"
+
+          if (this.data){
+
+            let country_ = this.data[this.country]
+
+            this.country_states.forEach((v,index) => {
+              if (v === this.country_state){
+                this.state_confirmed = country_.area_confirm[index]
+                this.state_deaths = country_.area_death[index]
+                this.state_recovered = country_.area_recover[index]
+                this.pieChartStateData = [ this.country_states ,this.state_confirmed, this.state_deaths, this.state_recovered]
+              }
+            })
+          }
+        },
         loadCountryData(){
             if (this.data){
-              let country_ = this.data[this.country]
-              this.confirmed = country_.confirmed
-              this.deaths = country_.deaths
-              this.recovered = country_.recovered
-            }
+                this.country_states = []
+                let country_ = this.data[this.country]
+                this.confirmed = country_.confirmed
+                this.deaths = country_.deaths
+                this.recovered = country_.recovered
 
+                if (country_.area && country_.area.length > 0)
+                {
+                  let index = 0
+                  this.country_states = country_.area
+                  this.country_state = this.country_states[index]
+                  this.state_confirmed = country_.area_confirm[index]
+                  this.state_deaths = country_.area_death[index]
+                  this.state_recovered = country_.area_recover[index]
+                }else{
+                  this.country_states = country_.area
+                  this.state_confirmed = "NA"
+                  this.state_deaths = "NA"
+                  this.state_recovered = "NA"
+                  this.country_state = "Not Available"
+                }
+              }
             this.loadChart()
         },
         loadChart(){
-             this.countries = Object.keys(this.data)
+            this.countries = Object.keys(this.data)
             this.pieChartData =[
               ['Confirmed' , this.confirmed],
               ['Deaths' , this.deaths],
@@ -209,6 +297,38 @@
                 // }
                 // }
             });
+
+
+          this.pieChartStateData =[
+            ['Confirmed' , this.state_confirmed],
+            ['Deaths' , this.state_deaths],
+            ['Recovered' , this.state_recovered],
+          ]
+
+          c3.generate({
+            bindto: '#pieChartState',
+            data: {
+              columns: this.pieChartStateData,
+              type : 'pie',
+            },
+            tooltip: {
+              format: {
+                value: function (value, ratio, id, index) { return value; }
+              }
+            },
+
+          });
+
+          // c3.generate({
+          //   bindto: '#linechart',
+          //
+          //   data: {
+          //     columns: [
+          //       ['state', this.state_confirmed, this.state_deaths, this.state_recovered],
+          //       ['country', this.confirmed, this.deaths, this.recovered],
+          //     ]
+          //   },
+          // });
         }
       },
       head(){

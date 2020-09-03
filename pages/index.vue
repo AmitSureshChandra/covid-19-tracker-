@@ -147,7 +147,8 @@
             this.recovered = 0
 
             let records = res.data.split('\n')
-            records.splice(0,1)
+            let headers  = records.splice(0,1)
+            // console.log(headers)
 
             records.splice(records.length-1,1)
             records.forEach(v => {
@@ -156,17 +157,31 @@
 
               if (Object.keys(countries).includes(data[3])){
                     let country = countries[data[3]]
+
+                // for country wise
                     country.country = data[3]
                     country.confirmed =  parseInt(country.confirmed) + parseInt(data[7])
                     country.deaths =  parseInt(country.deaths) + parseInt(data[8])
                     country.recovered =  parseInt(country.recovered) + parseInt(data[9])
 
+                //for area wise
+
+                    country.area.push(data[2])
+                    country.area_confirm.push(data[7])
+                    country.area_death.push(data[8])
+                    country.area_recover.push(data[9])
+
               }else{
+
                 let country = new GlobalData()
                 country.country = data[3]
                 country.confirmed += data[7]
                 country.deaths += data[8]
                 country.recovered += data[9]
+                country.area.push(data[2])
+                country.area_confirm.push(data[7])
+                country.area_death.push(data[8])
+                country.area_recover.push(data[9])
                 countries[data[3]] = country
               }
             })
@@ -175,7 +190,6 @@
             this.countries = countries
 
             this.pieChartData =[]
-
 
             Object.values(countries).forEach(v => {
                 this.confirmed = parseInt(this.confirmed) + parseInt(v.confirmed)
@@ -208,11 +222,11 @@
                 }
                 }
             });
-
           })
           .catch(_ => {
             console.log(_)
             alert('Something went Wrong ... try to choose Correct date')
+
           })
           .finally(_ => {
             this.loading = false
